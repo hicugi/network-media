@@ -11,7 +11,7 @@ import (
 )
 
 func GetMediaList(w http.ResponseWriter, req *http.Request) {
-	FORMATS := []string{".mp4", ".webm"}
+	FORMATS := []string{".mp4", ".webm", ".mkv"}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -26,7 +26,13 @@ func GetMediaList(w http.ResponseWriter, req *http.Request) {
 
 	for _, file := range files {
 		name := file.Name()
-		format := strings.ToLower(string(name[len(name)-4:]))
+
+		idx := strings.LastIndex(name, ".")
+		if idx == -1 {
+			continue
+		}
+
+		format := strings.ToLower(string(name[idx:]))
 
 		if !slices.Contains(FORMATS, format) {
 			continue
