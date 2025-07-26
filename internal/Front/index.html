@@ -43,7 +43,7 @@
 					document.body.removeChild(elm);
 				});
 
-				elm.src = '/api/video/play?s=' + file;
+				elm.src = `/api/video/play?s=${encodeURI(file)}`;
 
 				document.body.appendChild(elm);
 			}
