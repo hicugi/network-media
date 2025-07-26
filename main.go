@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"medianetwork/internal/Media"
+	"medianetwork/internal/Front"
 )
 
 const SERVER_PORT = 8000
@@ -41,7 +42,9 @@ func main() {
 		fmt.Println("Error getting interface addresses:", err)
 	}
 
+	handleReq("/", front.MainPage)
 	handleReq("/api/list", media.GetMediaList)
+	handleReq("/api/video/play", media.PlayVideo)
 
 	fmt.Printf("Starting server on http://%v:%v\n", myIp, SERVER_PORT)
 	http.ListenAndServe(fmt.Sprintf(":%v", SERVER_PORT), nil)

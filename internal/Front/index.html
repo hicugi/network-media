@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Media Network</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				display: flex;
+				align: center;
+				justify-content: center;
+			}
+
+			video {
+				position: absolute;
+				left: 50%;
+				top: 0;
+				transform: translateX(-50%);
+				display: block;
+				height: 100vh;
+			}
+		</style>
+	</head>
+	<body>
+		<ul id="elmList"></ul>
+
+		<script>
+			function selectVideo(file) {
+				const elm = document.createElement('VIDEO');
+
+				elm.setAttribute('controls', '');
+				elm.addEventListener('canplay', () => {
+					elm.play();
+				});
+				elm.addEventListener('ended', () => {
+					document.body.removeChild(elm);
+				});
+
+				elm.src = '/api/video/play?s=' + file;
+
+				document.body.appendChild(elm);
+			}
+
+			// fetch list
+			(async () => {
+				const { items } = await fetch('/api/list').then((r) => r.json());
+
+				for (const item of items) {
+					const li = document.createElement('LI');
+					const btn = document.createElement('BUTTON');
+
+					btn.innerText = item;
+					btn.addEventListener('click', () => selectVideo(item));
+
+					li.appendChild(btn);
+					elmList.appendChild(li);
+				}
+			})();
+		</script>
+	</body>
+</html>
