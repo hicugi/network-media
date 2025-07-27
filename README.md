@@ -8,7 +8,7 @@
 
 ## Idea
 
-Watch media by network across multiple devices.
+Transforms your device into server and shares your media folder across local network by web.
 
 ## How to run the project
 
