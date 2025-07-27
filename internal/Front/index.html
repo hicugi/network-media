@@ -1,31 +1,44 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Media Network</title>
+		<title>Network Media</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<style>
+			:root {
+				--gap: 20px;
+			}
 			html, body {
 				margin: 0;
-				padding: 0;
+				padding: 0 var(--gap);
+				font-family: Roboto, sans-serif;
 			}
 
 			ul {
-				--gap: 30px;
-				margin: 0 var(--gap);
-				padding: 40px 0;
+				margin: 0;
+				padding: 0;
 				list-style: none;
 				display: grid;
-				grid-template-columns: 1fr 1fr 1fr;
+				grid-template-columns: repeat(auto-fit, minmax(calc(360px - var(--gap) * 2), 1fr));
 				gap: var(--gap);
+				box-sizing: border-box;
 			}
 
-			video {
+			#video {
 				position: absolute;
 				left: 50%;
 				top: 0;
 				transform: translateX(-50%);
-				display: block;
+				width: 100%;
 				height: 100vh;
+				background: #000000df;
+				display: grid;
+				align-items: center;
+				justify-content: center;
+			}
+			video {
+				display: block;
+				width: auto-fit;
+				height: auto-fit;
 			}
 			button {
 				width: 100%;
@@ -39,22 +52,29 @@
 		</style>
 	</head>
 	<body>
+		<h1>Network Media</h1>
+		<h2>Your server's address: http://{{SERVER_HOST}}/</h2>
+
 		<ul id="elmList"></ul>
 
 		<script>
 			function selectVideo(file) {
-				const elm = document.createElement('VIDEO');
+				const elm = document.createElement('DIV');
+				elm.id = "video";
 
-				elm.setAttribute('controls', '');
-				elm.addEventListener('canplay', () => {
-					elm.play();
+				const video = document.createElement('VIDEO');
+
+				video.setAttribute('controls', '');
+				video.addEventListener('canplay', () => {
+					video.play();
 				});
-				elm.addEventListener('ended', () => {
+				video.addEventListener('ended', () => {
 					document.body.removeChild(elm);
 				});
 
-				elm.src = `/api/video/play?s=${encodeURI(file)}`;
+				video.src = `/api/video/play?s=${encodeURI(file)}`;
 
+				elm.appendChild(video);
 				document.body.appendChild(elm);
 			}
 

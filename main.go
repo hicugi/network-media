@@ -2,31 +2,12 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 
+	"medianetwork/internal/Config"
 	"medianetwork/internal/Media"
 	"medianetwork/internal/Front"
 )
-
-const SERVER_PORT = 8000
-
-func getMyIp() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", err
-	}
-
-	for _, addr := range addrs {
-		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
-			if ipNet.IP.To4() != nil {
-				return ipNet.IP.String(), nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("Local IP not found")
-}
 
 type Handler func(w http.ResponseWriter, req *http.Request)
 func handleReq(path string, callback Handler) {
@@ -37,7 +18,7 @@ func handleReq(path string, callback Handler) {
 }
 
 func main() {
-	myIp, err := getMyIp()
+	myIp, err := config.GetIP()
 	if err != nil {
 		fmt.Println("Error getting interface addresses:", err)
 	}
@@ -46,6 +27,6 @@ func main() {
 	handleReq("/api/list", media.GetMediaList)
 	handleReq("/api/video/play", media.PlayVideo)
 
-	fmt.Printf("Starting server on http://%v:%v\n", myIp, SERVER_PORT)
-	http.ListenAndServe(fmt.Sprintf(":%v", SERVER_PORT), nil)
+	fmt.Printf("Starting server on http://%v:%v\n", myIp, config.SERVER_PORT)
+	http.ListenAndServe(fmt.Sprintf(":%v", config.SERVER_PORT), nil)
 }
