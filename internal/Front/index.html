@@ -35,12 +35,38 @@
 				align-items: center;
 				justify-content: center;
 			}
+			#video button {
+				z-index: 1;
+				position: fixed;
+				top: 24px;
+				right: 24px;
+				width: 48px;
+				height: 48px;
+				border: none;
+				background: none;
+			}
+			#video button::before,
+			#video button::after {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				width: 80%;
+				height: 2px;
+				background: #dcdcdc;
+				content: '';
+			}
+			#video button::before {
+				transform: translate(-50%,-50%) rotate(45deg);
+			}
+			#video button::after {
+				transform: translate(-50%,-50%) rotate(-45deg);
+			}
 			video {
 				display: block;
 				width: auto-fit;
 				height: auto-fit;
 			}
-			button {
+			.card {
 				width: 100%;
 				height: 100%;
 				border: none;
@@ -63,13 +89,27 @@
 				elm.id = "video";
 
 				const video = document.createElement('VIDEO');
-
 				video.setAttribute('controls', '');
+				video.setAttribute('autoplay', '');
+				video.setAttribute('playsinline', 'inline');
+
+				function closeVideo() {
+					video.pause();
+					document.body.removeChild(elm);
+				}
+
+				const closeBtn = document.createElement('BUTTON');
+				elm.appendChild(closeBtn);
+
+				closeBtn.addEventListener('click', () => {
+					closeVideo();
+				});
+
 				video.addEventListener('canplay', () => {
-					video.play();
+					video.requestFullscreen();
 				});
 				video.addEventListener('ended', () => {
-					document.body.removeChild(elm);
+					closeVideo();
 				});
 
 				video.src = `/api/video/play?s=${encodeURI(file)}`;
@@ -86,6 +126,7 @@
 					const li = document.createElement('LI');
 					const btn = document.createElement('BUTTON');
 
+					btn.classList.add('card');
 					btn.innerText = item;
 					btn.addEventListener('click', () => selectVideo(item));
 
