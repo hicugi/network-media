@@ -1,4 +1,4 @@
-# Inspired project for hackathon by [Boot.Dev](https://www.boot.dev/)
+# Network Media
 
 <p align="center">
   <a href="https://go.dev/" target="_blank">
@@ -10,7 +10,22 @@
 
 Transforms your device into server and shares your media folder across local network by web.
 
-## How to run the project
+## Motivation
+
+Installing stuff like Plex and going through all those setting up steps takes a lot of time.<br>
+Would be much easier just run a app and everything ready to go live on TV.
+
+## Quick Start
+
+1. Download the medianetwork execution file
+3. Move the medianetwork into directory where media files located
+3. Run the app
+
+## Usage
+
+Open borwser on any device and type the address of your server.
+
+## Contributing
 
 1. Install Go v1.14.1
 2. Run the command in the root of the project `go build`
@@ -43,3 +58,6 @@ Example of the URL: `http://192.168.0.100:8000/`. Replace the `192.168.0.100` wi
 - [ ] Make the binary build for Windows 10/11
 - [ ] Scan for images (**.jpg, .jpeg, .png, .gif**) and add gallery UI
 - [ ] Scan for audio files and add music player
+
+<br>
+Inspired project for hackathon by [Boot.Dev](https://www.boot.dev/)
