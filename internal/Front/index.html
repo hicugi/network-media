@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<style>
 			:root {
+				--color-hover: #c6efc6;
 				--gap: 20px;
 			}
 			html, body {
@@ -67,6 +68,7 @@
 				height: auto-fit;
 			}
 			.card {
+				padding: 10px;
 				width: 100%;
 				height: 100%;
 				border: none;
@@ -74,6 +76,10 @@
 				font-size: 24px;
 				line-height: 1.2em;
 				aspect-ratio: 16/9;
+				word-break: break-word;
+			}
+			.card:focus, .card:hover {
+				background-color: var(--color-hover);
 			}
 		</style>
 	</head>
