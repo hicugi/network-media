@@ -10,6 +10,25 @@ import (
 	"crypto/sha256"
 )
 
+func ReadBytes(fileName string, start uint8, end uint8) (string, error) {
+	f, err := os.Open(fileName)
+	if err != nil {
+		return "", fmt.Errorf("Couldn't open the file")
+	}
+
+	buf := make([]byte, start + end)
+
+	_, err2 := f.Read(buf)
+	if err2 != nil {
+		return "", fmt.Errorf("Couldn't read the file")
+	}
+
+	res := string(buf[start:end])
+	f.Close();
+
+	return res, nil;
+}
+
 func GetMediaList(w http.ResponseWriter, req *http.Request) {
 	FORMATS := []string{"ftypmp42", "ftypqt  ", "ftypisom", "ftypavc1"}
 
@@ -32,25 +51,17 @@ func GetMediaList(w http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		f, err := os.Open(name)
+		format, err := ReadBytes(name, 4, 12)
 		if err != nil {
 			continue
 		}
-
-		gap := 4
-		buf := make([]byte, 8 + gap)
-
-		n, err := f.Read(buf)
-		if err != nil {
-			continue
-		}
-
-		format := string(buf[gap:n])
-		f.Close();
-
 		if !slices.Contains(FORMATS, format) {
 			continue
 		}
+
+		info, _ := ReadBytes(name, 0, 255)
+
+		fmt.Printf("%s | %s\n", name, info)
 
 		count++
 

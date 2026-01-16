@@ -19,7 +19,7 @@
 				padding: 0;
 				list-style: none;
 				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(calc(360px - var(--gap) * 2), 1fr));
+				grid-template-columns: repeat(auto-fit, minmax(calc(360px - var(--gap) * 2), 25%));
 				gap: var(--gap);
 				box-sizing: border-box;
 			}
@@ -68,18 +68,41 @@
 				height: auto-fit;
 			}
 			.card {
+				position: relative;
 				padding: 10px;
 				width: 100%;
 				height: 100%;
 				border: none;
 				background: #dcdcdc;
-				font-size: 24px;
+				font-size: 16px;
 				line-height: 1.2em;
 				aspect-ratio: 16/9;
 				word-break: break-word;
 			}
 			.card:focus, .card:hover {
 				background-color: var(--color-hover);
+			}
+			.card canvas {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+			}
+			.card span {
+				padding: 8px;
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				display: block;
+				background-color: #0000009e;
+				color: #fff;
+				box-sizing: border-box;
+			}
+
+			#thumbnailVideo {
+				display: none;
 			}
 		</style>
 	</head>
@@ -88,6 +111,7 @@
 		<h2>Your server's address: http://{{SERVER_HOST}}/</h2>
 
 		<ul id="elmList"></ul>
+		<video id="thumbnailVideo"></video>
 
 		<script>
 			function selectVideo(file) {
@@ -127,18 +151,55 @@
 			// fetch list
 			(async () => {
 				const { items } = await fetch('/api/list').then((r) => r.json());
+				const elms = [];
 
 				for (const item of items) {
 					const li = document.createElement('LI');
 					const btn = document.createElement('BUTTON');
+					const span = document.createElement('SPAN');
+					const canvas = document.createElement('CANVAS');
 
+					btn.videoLink = item;
 					btn.classList.add('card');
-					btn.innerText = item;
 					btn.addEventListener('click', () => selectVideo(item));
+					span.innerText = item;
 
+					elms.push(btn);
+
+					btn.appendChild(canvas);
+					btn.appendChild(span);
 					li.appendChild(btn);
 					elmList.appendChild(li);
 				}
+
+				let idx = 0;
+				function insertThumbnail() {
+					const btn = elms[idx];
+					if (btn === undefined) return;
+
+					const canvas = btn.querySelector('canvas');
+
+					idx++;
+
+					const video = document.querySelector('#thumbnailVideo');
+					video.src = `/api/video/play?s=${encodeURI(btn.videoLink)}`;
+
+					video.onloadeddata = () => {
+						const w = btn.clientWidth;
+						const h = btn.clientHeight;
+
+						const vw = video.videoWidth;
+						const vh = video.videoHeight;
+						const top = -h / 2;
+
+						setTimeout(() => {
+							canvas.getContext('2d').drawImage(video, 0, top, vw, h);
+							insertThumbnail();
+						}, 100);
+					}
+				}
+
+				insertThumbnail();
 			})();
 		</script>
 	</body>
