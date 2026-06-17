@@ -1,37 +1,58 @@
 package media
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"fmt"
-	"net/http"
-	"slices"
 	"io"
+	"net/http"
 	"os"
 	"strings"
-	"crypto/sha256"
 )
 
-func ReadBytes(fileName string, start uint8, end uint8) (string, error) {
+type signature struct {
+	offset int
+	data   []byte
+}
+
+var signatures = []signature{
+	{4, []byte("ftypmp42")},
+	{4, []byte("ftypqt  ")},
+	{4, []byte("ftypisom")},
+	{4, []byte("ftypavc1")},
+	{0, []byte{0x1A, 0x45, 0xDF, 0xA3}}, // MKV
+}
+
+func ReadBytes(fileName string, offset, length int) ([]byte, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't open the file")
+		return nil, fmt.Errorf("Couldn't open the file")
+	}
+	defer f.Close()
+
+	buf := make([]byte, offset+length)
+	_, err = f.Read(buf)
+	if err != nil {
+		return nil, fmt.Errorf("Couldn't read the file")
 	}
 
-	buf := make([]byte, start + end)
+	return buf[offset : offset+length], nil
+}
 
-	_, err2 := f.Read(buf)
-	if err2 != nil {
-		return "", fmt.Errorf("Couldn't read the file")
+func matchesSignature(name string) bool {
+	for _, sig := range signatures {
+		data, err := ReadBytes(name, sig.offset, len(sig.data))
+		if err != nil {
+			continue
+		}
+		if bytes.Equal(data, sig.data) {
+			return true
+		}
 	}
-
-	res := string(buf[start:end])
-	f.Close();
-
-	return res, nil;
+	return false
 }
 
 func GetMediaList(w http.ResponseWriter, req *http.Request) {
-	FORMATS := []string{"ftypmp42", "ftypqt  ", "ftypisom", "ftypavc1"}
-
 	w.Header().Set("Content-Type", "application/json")
 
 	files, err := os.ReadDir(".")
@@ -51,16 +72,11 @@ func GetMediaList(w http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		format, err := ReadBytes(name, 4, 12)
-		if err != nil {
-			continue
-		}
-		if !slices.Contains(FORMATS, format) {
+		if !matchesSignature(name) {
 			continue
 		}
 
 		info, _ := ReadBytes(name, 0, 255)
-
 		fmt.Printf("%s | %s\n", name, info)
 
 		count++
@@ -73,8 +89,8 @@ func GetMediaList(w http.ResponseWriter, req *http.Request) {
 		value = fmt.Sprintf("%s,\"%s\"", value, name)
 	}
 
-	res := fmt.Sprintf("{\"items\":[%s]}\n", value);
-	fmt.Printf("items found %v res %v\n", count, value);
+	res := fmt.Sprintf("{\"items\":[%s]}\n", value)
+	fmt.Printf("items found %v res %v\n", count, value)
 
 	io.WriteString(w, res)
 }
