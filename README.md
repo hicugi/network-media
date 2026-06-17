@@ -17,7 +17,7 @@ Would be much easier just run a app and everything ready to go live on TV.
 
 ## Quick Start
 
-1. Download the medianetwork execution file
+1. Download the [medianetwork](./medianetwork) execution build
 3. Move the medianetwork into directory where media files located
 3. Run the app
 
