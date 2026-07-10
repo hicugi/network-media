@@ -26,7 +26,7 @@ func MainPage(w http.ResponseWriter, req *http.Request) {
 	myIp, err := config.GetIP()
 	if err == nil {
 		host := fmt.Sprintf("%s:%s", myIp, config.SERVER_PORT)
-		html = strings.Replace(html, "{{SERVER_HOST}}", host, 1)
+		html = strings.Replace(html, "{{SERVER_HOST}}", host, 2)
 	}
 
 	io.WriteString(w, html)
