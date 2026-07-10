@@ -2,12 +2,14 @@ package media
 
 import (
 	"bytes"
-	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strings"
+	"syscall"
 )
 
 type signature struct {
@@ -96,32 +98,32 @@ func GetMediaList(w http.ResponseWriter, req *http.Request) {
 }
 
 func PlayVideo(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "video/mp4")
-
 	queryParams := req.URL.Query()
 	file := queryParams.Get("s")
 
-	data, err := os.ReadFile(file)
+	f, err := os.Open(file)
 	if err != nil {
-		fmt.Println("Error while reading video file:", err)
-		io.WriteString(w, "\r\n")
+		fmt.Println("Error while opening video file:", err)
+		http.NotFound(w, req)
+		return
+	}
+	defer f.Close()
+
+	info, err := f.Stat()
+	if err != nil {
+		fmt.Println("Error while stat video file:", err)
+		http.NotFound(w, req)
 		return
 	}
 
-	w.Header().Del("Content-Length")
-	w.Header().Set("Trailer", "X-Content-SHA256, X-Content-Length")
+	w.Header().Set("Content-Type", "video/mp4")
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", info.Size()))
 
-
-	size, err := io.WriteString(w, string(data))
-	if err != nil {
-		fmt.Println("Error while writing response body:", err)
-		io.WriteString(w, "\r\n")
-		return
+	if _, err := io.Copy(w, f); err != nil {
+		if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) ||
+			errors.Is(err, net.ErrClosed) || errors.Is(err, io.ErrClosedPipe) {
+			return
+		}
+		fmt.Println("Error while streaming video:", err)
 	}
-
-	sha256 := fmt.Sprintf("%x", sha256.Sum256(data))
-	w.Header().Set("X-Content-SHA256", sha256)
-	w.Header().Set("X-Content-Length", fmt.Sprintf("%d", size))
-
-	io.WriteString(w, "\r\n")
 }
