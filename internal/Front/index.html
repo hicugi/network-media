@@ -185,15 +185,21 @@
 					video.src = `/api/video/play?s=${encodeURI(btn.videoLink)}`;
 
 					video.onloadeddata = () => {
-						const w = btn.clientWidth;
-						const h = btn.clientHeight;
-
-						const vw = video.videoWidth;
-						const vh = video.videoHeight;
-						const top = -h / 2;
-
 						setTimeout(() => {
-							canvas.getContext('2d').drawImage(video, 0, top, vw, h);
+							const rect = canvas.getBoundingClientRect();
+							canvas.width = rect.width;
+							canvas.height = rect.height;
+
+							const ctx = canvas.getContext('2d');
+							const vw = video.videoWidth;
+							const vh = video.videoHeight;
+							const cw = rect.width;
+							const ch = rect.height;
+							const scale = Math.max(cw / vw, ch / vh);
+							const sw = vw * scale;
+							const sh = vh * scale;
+
+							ctx.drawImage(video, (cw - sw) / 2, (ch - sh) / 2, sw, sh);
 							insertThumbnail();
 						}, 100);
 					}
